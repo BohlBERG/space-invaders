@@ -93,7 +93,7 @@ const ALIEN_PAD_Y    = 8;
 const ALIEN_DROP     = 12;
 const ALIEN_STEP_X   = 8;
 const PLAYER_W       = 40;
-const PLAYER_H       = 24;
+const PLAYER_H       = 40;
 const SHIELD_COLS    = 22;
 const SHIELD_ROWS    = 14;
 const SHIELD_BLOCK   = 2;
@@ -254,6 +254,9 @@ canvas.addEventListener('click', () => canvas.focus());
 // ─── TITLE IMAGE ─────────────────────────────────────────────────────────────
 const titleImg = new Image();
 titleImg.src = 'title.png';
+
+const playerImg = new Image();
+playerImg.src = 'player.png';
 
 // ─── STARS ───────────────────────────────────────────────────────────────────
 const stars = Array.from({length: 80}, () => ({
@@ -675,7 +678,14 @@ function render() {
     if (player.explTimer>30 && Math.floor(player.explTimer/5)%2===0)
       drawSprite(SP_EXPL, player.x+6, player.y+4, '#ff6600', CELL);
   } else {
-    drawSprite(SP_PLAYER, player.x+1, player.y, '#00ff41', CELL);
+    if (playerImg.complete && playerImg.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(playerImg, player.x, player.y, PLAYER_W, PLAYER_H);
+      ctx.imageSmoothingEnabled = false;
+    } else {
+      drawSprite(SP_PLAYER, player.x+1, player.y, '#00ff41', CELL);
+    }
   }
 
   // player bullets
@@ -785,8 +795,15 @@ function renderHUD() {
   drawText(String(highScore).padStart(5,'0'), LW/2-6, 18, '#fff', 14);
   drawText('LV '+level, LW-66, 18, '#aaa', 12);
   // lives
-  for (let i=0; i<lives; i++)
-    drawSprite(SP_PLAYER, LW-44+i*18, 30, '#00ff41', 1);
+  for (let i=0; i<lives; i++) {
+    if (playerImg.complete && playerImg.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(playerImg, LW-44+i*18, 30, 16, 10);
+      ctx.imageSmoothingEnabled = false;
+    } else {
+      drawSprite(SP_PLAYER, LW-44+i*18, 30, '#00ff41', 1);
+    }
+  }
   // bombs
   for (let i=0; i<bombs; i++)
     drawSprite(SP_BOMB_ICON, 8+i*12, 30, '#ffa000', 1);
