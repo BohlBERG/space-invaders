@@ -794,40 +794,49 @@ function renderHUD() {
 }
 
 function renderTitle() {
+  let contentTop = 20;
   if (titleImg.complete && titleImg.naturalWidth > 0) {
     const maxW = LW - 80;
     const scale = Math.min(1, maxW / titleImg.naturalWidth);
     const tw = titleImg.naturalWidth * scale;
     const th = titleImg.naturalHeight * scale;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(titleImg, (LW - tw) / 2, 20, tw, th);
+    ctx.imageSmoothingEnabled = false;
+    contentTop = 20 + th + 20;
   } else {
     centerText('AB COLLECTIVE PRESENTS', 52, '#888', 14);
     centerText('TRUE DISCLOSURE', 84, '#cc44ff', 30);
+    contentTop = 104;
   }
-  ctx.fillStyle='#333';
-  ctx.fillRect(60, 100, LW-120, 2);
 
+  ctx.fillStyle='#333';
+  ctx.fillRect(60, contentTop, LW-120, 2);
+
+  const tableTop = contentTop + 12;
   const ox=LW/2-70;
-  drawSprite(SP_FORMIC_A[0], ox,    110, '#cc44ff', CELL);
-  drawText('= 30 PTS', ox+30, 126, '#cc44ff', 13);
-  drawSprite(SP_FORMIC_B[0], ox,    138, '#ff6622', CELL);
-  drawText('= 20 PTS', ox+30, 154, '#ff6622', 13);
-  drawSprite(SP_FORMIC_C[0], ox,    166, '#22ddaa', CELL);
-  drawText('= 10 PTS', ox+30, 182, '#22ddaa', 13);
-  drawSprite(SP_UFO,         ox+2,  194, '#ff44ff', CELL);
-  drawText('= ??? PTS', ox+30, 210, '#ff44ff', 13);
+  drawSprite(SP_FORMIC_A[0], ox, tableTop,      '#cc44ff', CELL);
+  drawText('= 30 PTS', ox+30, tableTop+16,      '#cc44ff', 13);
+  drawSprite(SP_FORMIC_B[0], ox, tableTop+28,   '#ff6622', CELL);
+  drawText('= 20 PTS', ox+30, tableTop+44,      '#ff6622', 13);
+  drawSprite(SP_FORMIC_C[0], ox, tableTop+56,   '#22ddaa', CELL);
+  drawText('= 10 PTS', ox+30, tableTop+72,      '#22ddaa', 13);
+  drawSprite(SP_UFO,         ox+2, tableTop+84, '#ff44ff', CELL);
+  drawText('= ??? PTS', ox+30, tableTop+100,    '#ff44ff', 13);
 
+  const divider2 = tableTop + 112;
   ctx.fillStyle='#333';
-  ctx.fillRect(60, 222, LW-120, 2);
+  ctx.fillRect(60, divider2, LW-120, 2);
 
-  drawText('CONTROLS', LW/2-52, 250, '#888', 13);
-  drawText('ARROW KEYS  — move', 80, 272, '#666', 13);
-  drawText('SPACE BAR   — fire', 80, 292, '#666', 13);
-  drawText('B KEY       — bomb (3 per wave)', 80, 312, '#ffa000', 13);
-  drawText('P KEY       — pause', 80, 332, '#666', 13);
+  drawText('CONTROLS', LW/2-52, divider2+22, '#888', 13);
+  drawText('ARROW KEYS  — move',          80, divider2+42, '#666', 13);
+  drawText('SPACE BAR   — fire',          80, divider2+60, '#666', 13);
+  drawText('B KEY       — bomb (3/wave)', 80, divider2+78, '#ffa000', 13);
+  drawText('P KEY       — pause',         80, divider2+96, '#666', 13);
 
   if (Math.floor(frame/30)%2===0)
-    centerText('PRESS SPACE TO START', 390, '#fff', 16);
+    centerText('PRESS SPACE TO START', LH-50, '#fff', 16);
 
   centerText('HI: '+String(highScore).padStart(5,'0'), LH-18, '#ffdd33', 13);
 }
