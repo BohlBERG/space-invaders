@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ender's War</title>
+  <title>True Disclosure</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -250,6 +250,10 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 canvas.addEventListener('click', () => canvas.focus());
+
+// ─── TITLE IMAGE ─────────────────────────────────────────────────────────────
+const titleImg = new Image();
+titleImg.src = 'title.png';
 
 // ─── STARS ───────────────────────────────────────────────────────────────────
 const stars = Array.from({length: 80}, () => ({
@@ -790,9 +794,18 @@ function renderHUD() {
 }
 
 function renderTitle() {
-  centerText("ENDER'S WAR", 72, '#cc44ff', 30);
+  if (titleImg.complete && titleImg.naturalWidth > 0) {
+    const maxW = LW - 80;
+    const scale = Math.min(1, maxW / titleImg.naturalWidth);
+    const tw = titleImg.naturalWidth * scale;
+    const th = titleImg.naturalHeight * scale;
+    ctx.drawImage(titleImg, (LW - tw) / 2, 20, tw, th);
+  } else {
+    centerText('AB COLLECTIVE PRESENTS', 52, '#888', 14);
+    centerText('TRUE DISCLOSURE', 84, '#cc44ff', 30);
+  }
   ctx.fillStyle='#333';
-  ctx.fillRect(60, 94, LW-120, 2);
+  ctx.fillRect(60, 100, LW-120, 2);
 
   const ox=LW/2-70;
   drawSprite(SP_FORMIC_A[0], ox,    110, '#cc44ff', CELL);
