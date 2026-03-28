@@ -95,8 +95,8 @@ const ALIEN_STEP_X   = 8;
 const PLAYER_W       = 40;
 const PLAYER_H       = 40;
 const SHIELD_COLS    = 22;
-const SHIELD_ROWS    = 14;
-const SHIELD_BLOCK   = 2;
+const SHIELD_ROWS    = 20;
+const SHIELD_BLOCK   = 4;
 const CELL           = 2;
 const GROUND_Y       = LH - 40;
 
@@ -226,6 +226,12 @@ function makeShieldBlocks() {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
     [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
     [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
@@ -257,6 +263,15 @@ titleImg.src = 'title.png';
 
 const playerImg = new Image();
 playerImg.src = 'player.png';
+
+const bunkerImg = new Image();
+bunkerImg.src = 'bunker.png';
+
+// Offscreen canvas for masked bunker rendering
+const bunkerCanvas = document.createElement('canvas');
+bunkerCanvas.width  = SHIELD_COLS * SHIELD_BLOCK;
+bunkerCanvas.height = SHIELD_ROWS * SHIELD_BLOCK;
+const bunkerCtx = bunkerCanvas.getContext('2d');
 
 // ─── STARS ───────────────────────────────────────────────────────────────────
 const stars = Array.from({length: 80}, () => ({
@@ -327,8 +342,8 @@ function initShields() {
   const totalW = 4 * (SHIELD_COLS * SHIELD_BLOCK) + 3 * 40;
   let x = (LW - totalW) / 2;
   for (let i = 0; i < 4; i++) {
-    shields.push({ x, y: GROUND_Y - 84, blocks: makeShieldBlocks() });
-    x += SHIELD_COLS * SHIELD_BLOCK + 40;
+    shields.push({ x, y: GROUND_Y - 100, blocks: makeShieldBlocks() });
+    x += SHIELD_COLS * SHIELD_BLOCK + 16;
   }
 }
 
@@ -656,12 +671,30 @@ function render() {
   ctx.fillRect(0, GROUND_Y+2, LW, 2);
 
   // shields
-  ctx.fillStyle='#00ff41';
-  for (const sh of shields)
-    for (let r=0;r<SHIELD_ROWS;r++)
-      for (let c=0;c<SHIELD_COLS;c++)
-        if (sh.blocks[r][c])
-          ctx.fillRect(sh.x+c*SHIELD_BLOCK, sh.y+r*SHIELD_BLOCK, SHIELD_BLOCK, SHIELD_BLOCK);
+  for (const sh of shields) {
+    if (bunkerImg.complete && bunkerImg.naturalWidth > 0) {
+      // draw bunker image to offscreen canvas
+      bunkerCtx.clearRect(0, 0, bunkerCanvas.width, bunkerCanvas.height);
+      bunkerCtx.imageSmoothingEnabled = false;
+      bunkerCtx.drawImage(bunkerImg, 0, 0, bunkerCanvas.width, bunkerCanvas.height);
+      // punch out destroyed blocks using destination-out
+      bunkerCtx.globalCompositeOperation = 'destination-out';
+      bunkerCtx.fillStyle = 'rgba(0,0,0,1)';
+      for (let r=0;r<SHIELD_ROWS;r++)
+        for (let c=0;c<SHIELD_COLS;c++)
+          if (!sh.blocks[r][c])
+            bunkerCtx.fillRect(c*SHIELD_BLOCK, r*SHIELD_BLOCK, SHIELD_BLOCK, SHIELD_BLOCK);
+      bunkerCtx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(bunkerCanvas, sh.x, sh.y);
+    } else {
+      // fallback to colored blocks
+      ctx.fillStyle='#00ff41';
+      for (let r=0;r<SHIELD_ROWS;r++)
+        for (let c=0;c<SHIELD_COLS;c++)
+          if (sh.blocks[r][c])
+            ctx.fillRect(sh.x+c*SHIELD_BLOCK, sh.y+r*SHIELD_BLOCK, SHIELD_BLOCK, SHIELD_BLOCK);
+    }
+  }
 
   // aliens
   for (const a of aliens) {
